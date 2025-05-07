@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_pokemon/core/navigation/app_router.dart';
 
 class PokemonApp extends StatelessWidget {
   const PokemonApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Material App',
-      home: Scaffold(
-        appBar: AppBar(title: const Text('Material App Bar')),
-        body: const Center(child: Text('Hello Pokemon')),
-      ),
+    return MaterialApp.router(
+      debugShowCheckedModeBanner: false,
+      routerConfig: router,
+      title: 'Pokedex App',
     );
   }
 }
