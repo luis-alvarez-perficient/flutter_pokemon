@@ -7,7 +7,7 @@ abstract class Mapper<DTOS, Entity> {
     return dtos.map((dto) => fromDTO(dto)).toList();
   }
 
-  List<DTOS> toDTOList(List<Entity> domainModels) {
-    return domainModels.map((entity) => toDTO(entity)).toList();
+  List<DTOS> toDTOList(List<Entity> entities) {
+    return entities.map((entity) => toDTO(entity)).toList();
   }
 }

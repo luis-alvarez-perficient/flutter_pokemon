@@ -1,19 +1,29 @@
-import 'package:flutter_pokemon/core/model/pokemon/pokemon_simple_response_dto.dart';
+import 'package:flutter_pokemon/core/data/mapper/pokemon_response_mapper.dart';
+import 'package:flutter_pokemon/core/error/failures.dart';
+import 'package:flutter_pokemon/feature/pokemon/entities/pokemon_simple_response_entity.dart';
+import 'package:fpdart/fpdart.dart';
 import '../../../model/pokemon/pokemon_response_dto.dart';
 import '../../data_sources/pokemon_data_source/pokemon_remote_data_source.dart';
 
 abstract class PokemonRepository {
-  Future<PokemonSimpleResponseDTO> getPokemonList({int? limit, int? offset});
+  Future<Either<Failure, PokemonSimpleResponseEntity>> getPokemonList({
+    int? limit,
+    int? offset,
+  });
   Future<PokemonResponseDTO> getPokemonDetail(String name);
 }
 
 class PokemonRepositoryImpl implements PokemonRepository {
+  final PokemonSimpleResponseMapper pokemonResponseMapper;
   final PokemonRemoteDataSource remoteDataSource;
 
-  PokemonRepositoryImpl({required this.remoteDataSource});
+  PokemonRepositoryImpl({
+    required this.remoteDataSource,
+    required this.pokemonResponseMapper,
+  });
 
   @override
-  Future<PokemonSimpleResponseDTO> getPokemonList({
+  Future<Either<Failure, PokemonSimpleResponseEntity>> getPokemonList({
     int? limit,
     int? offset,
   }) async {
@@ -21,20 +31,7 @@ class PokemonRepositoryImpl implements PokemonRepository {
       limit: limit,
       offset: offset,
     );
-
-    // pokemonResponseDTO.results.forEach(
-    //   (pokemon) => pokemon.copyWith(
-    //     image: "${Api.baseUrlPokemonImage + pokemon.name}.jpg",
-    //   ),
-    // );
-
-    //   RegExp regex = RegExp(r"\b[0-9]+");
-    // for (var pokemon in pokemonResponseDTO.results) {
-    //   pokemon.copyWith(url: pokemon.url.replaceAll(Api.endpointPokemon, ""));
-    //   // final id = regex.allMatches(pokemon.url).map((m) => m.group(0));
-    //   // pokemon.copyWith(image: "${Api.baseUrlPokemonImage + pokemon.name}.jpg");
-    // }
-    return pokemonResponseDTO;
+    return Right(pokemonResponseMapper.fromDTO(pokemonResponseDTO));
   }
 
   @override

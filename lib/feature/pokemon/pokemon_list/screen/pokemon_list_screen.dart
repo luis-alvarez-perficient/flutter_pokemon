@@ -1,60 +1,67 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_pokemon/common/di/injection.dart';
-import 'package:flutter_pokemon/feature/pokemon/pokemon_list/screen/data_pokemon.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_pokemon/common/state/ui_state.dart';
+import 'package:flutter_pokemon/feature/pokemon/bloc/pokemon_bloc.dart';
+import 'package:flutter_pokemon/feature/pokemon/entities/pokemon_simple_entity.dart';
+import 'package:flutter_pokemon/feature/pokemon/entities/pokemon_simple_response_entity.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/data/repositories/pokemon_repository/pokemon_repository.dart';
-import '../../../../core/model/pokemon/pokemon_simple_dto.dart';
 
-class PokemonListScreen extends StatefulWidget {
+class PokemonListScreen extends StatelessWidget {
   const PokemonListScreen({super.key});
-
-  @override
-  State<PokemonListScreen> createState() => _PokemonListScreenState();
-}
-
-class _PokemonListScreenState extends State<PokemonListScreen> {
-  late final List<PokemonSimpleDTO> data = [];
-
-  @override
-  void initState() {
-    getData();
-    super.initState();
-  }
-
-  getData() async {
-    final data = await sl<PokemonRepository>().getPokemonList(
-      limit: 20,
-      offset: 0,
-    );
-
-    final pokemonList = await sl<PokemonRepository>().getPokemonDetail(
-      "bulbasaur",
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return _pokemonListScreenContent(context);
   }
 
   Widget _pokemonListScreenContent(BuildContext context) {
-    final data = dataPokemon();
+    context.read<PokemonBloc<PokemonSimpleResponseEntity>>().add(
+      PokemonEvent.getAllPokemons(),
+    );
 
+    return BlocBuilder<
+      PokemonBloc<PokemonSimpleResponseEntity>,
+      UiState<PokemonSimpleResponseEntity>
+    >(
+      builder: (context, state) {
+        switch (state) {
+          case Initial<PokemonSimpleResponseEntity>():
+            return const Center(child: Text('Initial'));
+          case Loading<PokemonSimpleResponseEntity>():
+            return const Center(child: CircularProgressIndicator());
+          case Error<PokemonSimpleResponseEntity>():
+            return Center(child: Text(state.message));
+          case Empty<PokemonSimpleResponseEntity>():
+            return const Center(child: Text('Empty'));
+          case Data<PokemonSimpleResponseEntity>():
+            final pokemons = state.value.results;
+            return CustomGridViewPokemon(pokemons: pokemons);
+          default:
+            return const Center(child: Text('Unknown state'));
+        }
+      },
+    );
+  }
+}
+
+class CustomGridViewPokemon extends StatelessWidget {
+  final List<PokemonSimpleEntity> pokemons;
+  const CustomGridViewPokemon({super.key, required this.pokemons});
+
+  @override
+  Widget build(BuildContext context) {
     final orientation = MediaQuery.of(context).orientation;
+
     return Container(
       color: Colors.black,
       child: GridView.builder(
-        itemCount: data.length,
+        itemCount: pokemons.length,
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: (orientation == Orientation.portrait) ? 2 : 3,
+          crossAxisCount: (orientation == Orientation.portrait) ? 2 : 4,
         ),
         itemBuilder: (BuildContext context, int index) {
-          final name = data[index]['name']!;
-          final image = data[index]['image']!;
-
-          // final name = data[index].name;
-          // final image = data[index].image;
-          return CustomCardPokemon(name: name, image: image);
+          return CustomCardPokemon(pokemon: pokemons[index]);
         },
       ),
     );
@@ -62,18 +69,20 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
 }
 
 class CustomCardPokemon extends StatelessWidget {
-  final String name;
-  final String image;
-
-  const CustomCardPokemon({super.key, required this.name, required this.image});
+  final PokemonSimpleEntity pokemon;
+  const CustomCardPokemon({super.key, required this.pokemon});
 
   @override
   Widget build(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
+    final width = MediaQuery.of(context).size.width;
+    final diag = sqrt(pow(height, 2) + pow(width, 2));
+
     return GestureDetector(
       onTap: () {
         context.goNamed(
           "pokemonDetail",
-          queryParameters: {'name': name, 'image': image},
+          queryParameters: {'name': pokemon.name, 'image': pokemon.image},
         );
       },
       child: Card(
@@ -85,18 +94,43 @@ class CustomCardPokemon extends StatelessWidget {
         elevation: 3,
         margin: EdgeInsets.all(5),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(
-              height: 160,
+            Container(
               width: double.infinity,
-              child: Hero(
-                tag: name,
-                child: Image.network(image, fit: BoxFit.scaleDown),
+              padding: const EdgeInsets.all(5),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  SizedBox(width: 5),
+                  Text(
+                    pokemon.id.toString(),
+                    style: const TextStyle(color: Colors.black, fontSize: 15),
+                  ),
+                ],
               ),
             ),
-            Text(name, style: TextStyle(fontSize: 15)),
+
+            SizedBox(
+              height: diag * 0.143,
+              width: double.infinity,
+              child: Hero(
+                tag: "PK_HERO_${pokemon.name}",
+                child: Image.network(pokemon.image, fit: BoxFit.fitHeight),
+              ),
+            ),
+
+            SizedBox(
+              width: double.infinity,
+              child: Hero(
+                tag: pokemon.name,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(pokemon.name, style: TextStyle(fontSize: 15)),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),

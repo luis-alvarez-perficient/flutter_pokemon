@@ -34,12 +34,12 @@ class PokemonSimpleDTO {
       RegExp(r"\b[0-9]+").firstMatch(map['url'])?.group(0) ?? "0",
     );
 
-    final image = "${Api.baseUrlPokemonImage}${map['name']}.jpg ";
+    final image = "${Api.baseUrlPokemonImage}${map['name'] ?? ''}.jpg";
 
     return PokemonSimpleDTO(
       id: id,
-      name: map['name'] as String,
-      url: map['url'] as String,
+      name: map['name'] ?? '',
+      url: map['url'] ?? '',
       image: image,
     );
   }

@@ -60,7 +60,7 @@ class CustomSliverAppBar extends StatelessWidget {
         title: Text(name),
         collapseMode: CollapseMode.parallax,
         background: Hero(
-          tag: name,
+          tag: "PK_HERO_$name",
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.only(
