@@ -109,7 +109,7 @@ class PowerSkillsBoxAdapter extends StatelessWidget {
           children: [
             const Text('Powers', style: TextStyle(fontSize: 24)),
             PowerSkill(
-              value: 150,
+              value: 200,
               totalValue: 300,
               label: 'HP',
               valueColor: Colors.red,

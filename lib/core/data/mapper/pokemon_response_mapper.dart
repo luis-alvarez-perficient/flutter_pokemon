@@ -15,16 +15,6 @@ class PokemonSimpleResponseMapper
       previous: dto.previous,
       next: dto.next,
       results: pokemonSimpleMapper.fromDTOList(dto.results),
-      // dto.results
-      //     .map(
-      //       (e) => PokemonSimpleEntity(
-      //         id: e.id,
-      //         name: e.name,
-      //         url: e.url,
-      //         image: e.image,
-      //       ),
-      //     )
-      //     .toList(),
     );
   }
 
@@ -35,37 +25,6 @@ class PokemonSimpleResponseMapper
       previous: entity.previous,
       next: entity.next,
       results: pokemonSimpleMapper.toDTOList(entity.results),
-
-      // entity.results
-      //     .map(
-      //       (e) => PokemonSimpleDTO(
-      //         id: e.id,
-      //         name: e.name,
-      //         url: e.url,
-      //         image: e.image,
-      //       ),
-      //     )
-      //     .toList(),
     );
   }
-
-  // @override
-  // PokemonSimpleEntity fromDTO(PokemonSimpleDTO dto) {
-  //   return PokemonSimpleEntity(
-  //     id: dto.id,
-  //     name: dto.name,
-  //     url: dto.url,
-  //     image: dto.image,
-  //   );
-  // }
-
-  // @override
-  // PokemonSimpleDTO toDTO(PokemonSimpleEntity entity) {
-  //   return PokemonSimpleDTO(
-  //     id: entity.id,
-  //     name: entity.name,
-  //     url: entity.url,
-  //     image: entity.image,
-  //   );
-  // }
 }
